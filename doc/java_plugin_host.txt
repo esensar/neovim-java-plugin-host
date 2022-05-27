@@ -1,0 +1,81 @@
+*java_plugin_host.txt* Description
+
+INTRODUCTION                                     *java_plugin_host*
+
+Description
+
+CONTENTS                                         *java_plugin_host-contents*
+
+  1.  Overview                                   |java_plugin_host-overview|
+  2.  Requirements                               |java_plugin_host-requirements|
+  3.  Installation                               |java_plugin_host-installation|
+  4.  Usage                                      |java_plugin_host-usage|
+  5.  Commands                                   |java_plugin_host-commands|
+  6.  Functions                                  |java_plugin_host-functions|
+  7.  Mappings                                   |java_plugin_host-mappings|
+  8.  Plugs                                      |java_plugin_host-plugs|
+  9.  Options                                    |java_plugin_host-options|
+  10. Issues                                     |java_plugin_host-issues|
+  11. Contributing                               |java_plugin_host-contributing|
+  12. Version                                    |java_plugin_host-version|
+  13. License                                    |java_plugin_host-license|
+
+OVERVIEW                                         *java_plugin_host-overview*
+
+REQUIREMENTS                                     *java_plugin_host-requirements*
+
+INSTALLATION                                     *java_plugin_host-installation*
+
+1. Packer.nvim <https://github.com/wbthomason/packer.nvim>
+
+Add the following to your packer setup: >
+
+  use { 'esensar/neovim-java-plugin-host' }
+<
+
+2. Plug <https://github.com/junegunn/vim-plug>
+
+Add the following to your vimrc, or something sourced therein: >
+
+  Plug 'esensar/neovim-java-plugin-host'
+<
+Then install via `:PlugInstall`
+
+3. Manual
+
+Clone this repository and copy the files in plugin/, lua/, and doc/
+to their respective directories in your vimfiles, or copy the text from
+the github repository into new files in those directories. Make sure to
+run `:helptags`.
+
+USAGE                                            *java_plugin_host-usage*
+
+COMMANDS                                         *java_plugin_host-commands*
+
+FUNCTIONS                                        *java_plugin_host-functions*
+
+MAPPINGS                                         *java_plugin_host-mappings*
+
+PLUGS                                            *java_plugin_host-plugs*
+
+OPTIONS                                          *java_plugin_host-options*
+
+ISSUES                                           *java_plugin_host-issues*
+
+If you experience issues using plugin, please report them at
+<https://github.com/esensar/neovim-java-plugin-host/issues>.
+
+CONTRIBUTING                                     *java_plugin_host-contributing*
+
+Feel free to look at already reported issues at
+<https://github.com/esensar/neovim-java-plugin-host/issues>.
+If available, check out CONTRIBUTING.md in the repository.
+Otherwise, feel free to create a new issue or pull request.
+
+VERSION                                          *java_plugin_host-version*
+
+Version 1.0.0
+
+LICENSE                                          *java_plugin_host-license*
+
+vim:tw=78:ts=2:ft=help:norl:
