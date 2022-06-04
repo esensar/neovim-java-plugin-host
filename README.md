@@ -1,7 +1,8 @@
 # java_plugin_host
 
-Template for neovim lua plugins
+Java plugin host
 
+**WORK IN PROGRESS**
 
 
 ## Requirements
