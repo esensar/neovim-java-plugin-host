@@ -123,7 +123,7 @@ Otherwise, feel free to create a new issue or pull request.
 
 VERSION                                          *java_plugin_host-version*
 
-Version 0.1.0
+Version 0.1.2
 
 LICENSE                                          *java_plugin_host-license*
 
