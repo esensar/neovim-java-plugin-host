@@ -71,7 +71,7 @@ require("java_plugin_host").setup {
 }
 ```
 
-**NOTE**: When adding `.java` classes directly in `rplugin/java`, make sure to omit package!
+**NOTE**: When adding `.java` classes directly in `rplugin/java`, make sure to create directories for packages starting from `rplugin/java` as root. This means that any `.java` classes found in `rplugin/java` directly should have no package at all (implicit root package).
 
 ### Functions
 

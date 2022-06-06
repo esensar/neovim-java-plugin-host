@@ -207,20 +207,24 @@ local function rebuild_classpath(callback)
 				vim.list_extend(M.classpath, vim.api.nvim_get_runtime_file("rplugin/hosted-jar/*.jar", true))
 			end
 			if last_opts.rplugins.compile_java then
-				local source_files = vim.api.nvim_get_runtime_file("rplugin/java/*.java", true)
-				local args = {
-					"-classpath",
-					vim.fn.join(M.classpath, ":"),
-				}
-				vim.list_extend(args, source_files)
-				executor.run_command("javac", {
-					args = args,
-				}, function(code, _)
-					if code > 0 then
-						vim.notify("Compilation for java files failed!", vim.log.levels.ERROR)
-					end
+				local source_files = vim.api.nvim_get_runtime_file("rplugin/java/**/*.java", true)
+				if #source_files > 0 then
+					local args = {
+						"-classpath",
+						vim.fn.join(M.classpath, ":"),
+					}
+					vim.list_extend(args, source_files)
+					executor.run_command("javac", {
+						args = args,
+					}, function(code, _)
+						if code > 0 then
+							vim.notify("Compilation for java files failed!", vim.log.levels.ERROR)
+						end
+						callback()
+					end)
+				else
 					callback()
-				end)
+				end
 			else
 				callback()
 			end
