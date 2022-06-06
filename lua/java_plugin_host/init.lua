@@ -23,7 +23,11 @@ local function spec_to_xml(spec)
 end
 
 local function repo_to_xml(spec)
-	return "            <repository><id>" .. spec .. "</id><url>" .. spec .. "</url></repository>"
+	return "            <repository><id>"
+		.. string.gsub(spec, "%W", "")
+		.. "</id><url>"
+		.. spec
+		.. "</url></repository>"
 end
 
 local function build_temp_pom_xml(specs, repo_specs)
