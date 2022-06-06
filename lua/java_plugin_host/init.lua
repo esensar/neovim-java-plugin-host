@@ -176,9 +176,87 @@ end
 
 M.log_level = "info"
 
+local last_opts = nil
+M.classpath = {}
+local common_host_job_id = nil
+local standalone_jobs = {}
+
+local function rebuild_classpath(callback)
+	M.classpath = last_opts.classpath_extras or {}
+	if last_opts.rplugins.load_class then
+		vim.list_extend(M.classpath, vim.api.nvim_get_runtime_file("rplugin/java", true))
+	end
+	if last_opts.common_host.enabled ~= false then
+		fetch_plugins(last_opts.common_host, function()
+			vim.list_extend(M.classpath, { jars_directory .. "*" })
+			if last_opts.rplugins.load_hosted ~= false then
+				vim.list_extend(M.classpath, vim.api.nvim_get_runtime_file("rplugin/hosted-jar/*.jar", true))
+			end
+			if last_opts.rplugins.compile_java then
+				local source_files = vim.api.nvim_get_runtime_file("rplugin/java/*.java", true)
+				local args = {
+					"-classpath",
+					vim.fn.join(M.classpath, ":"),
+				}
+				vim.list_extend(args, source_files)
+				executor.run_command("javac", {
+					args = args,
+				}, function(code, _)
+					if code > 0 then
+						vim.notify("Compilation for java files failed!", vim.log.levels.ERROR)
+					end
+					if last_opts.rplugins.load_class then
+						vim.list_extend(M.classpath, vim.api.nvim_get_runtime_file("rplugin/java", true))
+					end
+					callback()
+				end)
+			else
+				callback()
+			end
+		end)
+	end
+end
+
+local function start_common_host()
+	common_host_job_id = vim.fn.jobstart({
+		"java",
+		"-classpath",
+		vim.fn.join(M.classpath, ":"),
+		last_opts.common_host.main_class_name,
+	}, {
+		rpc = true,
+		on_stderr = function(channel_id, data, _)
+			handle_stderr(channel_id, data)
+		end,
+	})
+	vim.notify("Java plugin host started successfully!")
+end
+
+local function start_standalone_rplugins()
+	if last_opts.rplugins.load_standalone then
+		local rplugin_jars = vim.api.nvim_get_runtime_file("rplugin/jar/*.jar", true)
+		for _, jar in ipairs(rplugin_jars) do
+			local job_id = vim.fn.jobstart({
+				"java",
+				"-jar",
+				jar,
+			}, {
+				rpc = true,
+				on_stderr = function(channel_id, data, _)
+					handle_stderr(channel_id, data)
+				end,
+			})
+			table.insert(standalone_jobs, job_id)
+		end
+	end
+end
+
 ---Start up the host and all plugins
 ---@param opts JavaPluginHostSetupOpts
 function M.setup(opts)
+	if last_opts ~= nil then
+		return
+	end
 	vim.fn.mkdir(plugin_host_directory, "p")
 	opts = opts or {}
 	opts.rplugins = opts.rplugins or {}
@@ -196,64 +274,41 @@ function M.setup(opts)
 		config.log_level = opts.log_level
 	end
 
-	local classpath = opts.classpath_extras or {}
-	if opts.rplugins.load_class then
-		vim.list_extend(classpath, vim.api.nvim_get_runtime_file("rplugin/java/*.class"))
-	end
-	if opts.common_host.enabled ~= false then
-		fetch_plugins(opts.common_host, function()
-			vim.list_extend(classpath, { jars_directory .. "*" })
-			if opts.rplugins.load_hosted ~= false then
-				vim.list_extend(classpath, vim.api.nvim_get_runtime_file("rplugin/hosted-jar/*.jar", true))
-			end
-			vim.fn.jobstart({
-				"java",
-				"-classpath",
-				vim.fn.join(classpath, ":"),
-				opts.common_host.main_class_name,
-			}, {
-				rpc = true,
-				on_stderr = function(channel_id, data, _)
-					handle_stderr(channel_id, data)
-				end,
-			})
-			vim.notify("Java plugin host started successfully!")
-		end)
-	end
+	last_opts = opts
+	rebuild_classpath(start_common_host)
 
-	if opts.rplugins.load_standalone then
-		local rplugin_jars = vim.api.nvim_get_runtime_file("rplugin/jar/*.jar", true)
-		for _, jar in ipairs(rplugin_jars) do
-			vim.fn.jobstart({
-				"java",
-				"-jar",
-				jar,
-			}, {
-				rpc = true,
-				on_stderr = function(channel_id, data, _)
-					handle_stderr(channel_id, data)
-				end,
-			})
-		end
-	end
+	start_standalone_rplugins()
+end
 
-	if opts.rplugins.compile_java then
-		local source_files = vim.api.nvim_get_runtime_file("rplugin/java/*.java", true)
-		for _, source_file in ipairs(source_files) do
-			executor.run_command("javac", {
-				args = {
-					"-cp",
-					"-classpath",
-					vim.fn.join(classpath, ":"),
-					source_file,
-				},
-			}, function(code, _)
-				if code > 0 then
-					vim.notify("Compilation for " .. source_file .. " failed!", vim.log.levels.ERROR)
-				end
-			end)
-		end
+function M.rebuild_classpath(classpath_callback)
+	rebuild_classpath(function()
+		classpath_callback(M.classpath)
+	end)
+end
+
+function M.restart()
+	if common_host_job_id ~= nil or not vim.tbl_isempty(standalone_jobs) then
+		M.stop()
+		M.start()
 	end
+end
+
+function M.start()
+	if common_host_job_id == nil and vim.tbl_isempty(standalone_jobs) then
+		start_common_host()
+		start_standalone_rplugins()
+	end
+end
+
+function M.stop()
+	if common_host_job_id ~= nil then
+		vim.fn.jobstop(common_host_job_id)
+		common_host_job_id = nil
+	end
+	for _, v in ipairs(standalone_jobs) do
+		vim.fn.jobstop(v)
+	end
+	standalone_jobs = {}
 end
 
 return M
