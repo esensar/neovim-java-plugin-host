@@ -71,6 +71,8 @@ require("java_plugin_host").setup {
 }
 ```
 
+**NOTE**: When adding `.java` classes directly in `rplugin/java`, make sure to omit package!
+
 ### Functions
 
 `require("java_plugin_host").setup()` - main function for configuring the plugin, must be called before using any other function
