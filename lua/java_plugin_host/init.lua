@@ -22,7 +22,11 @@ local function spec_to_xml(spec)
 		.. "</version></dependency>"
 end
 
-local function build_temp_pom_xml(specs)
+local function repo_to_xml(spec)
+	return "            <repository><id>" .. spec .. "</id><url>" .. spec .. "</url></repository>"
+end
+
+local function build_temp_pom_xml(specs, repo_specs)
 	local list = {
 		'<?xml version="1.0" encoding="UTF-8"?>',
 		'<project xmlns="http://maven.apache.org/POM/4.0.0"',
@@ -32,8 +36,13 @@ local function build_temp_pom_xml(specs)
 		"    <groupId>com.ensarsarajcic.neovim.java-plugin-host</groupId>",
 		"    <artifactId>fake</artifactId>",
 		"    <version>1.0.0</version>",
-		"    <dependencies>",
+		"    <repositories>",
 	}
+	vim.list_extend(list, vim.tbl_map(repo_to_xml, repo_specs))
+	vim.list_extend(list, {
+		"    </repositories>",
+		"    <dependencies>",
+	})
 
 	vim.list_extend(list, vim.tbl_map(spec_to_xml, specs))
 
@@ -86,7 +95,7 @@ local function fetch_plugins(common_host_opts, callback)
 		table.insert(jars, plugin.name)
 	end
 
-	local lines = build_temp_pom_xml(jars)
+	local lines = build_temp_pom_xml(jars, common_host_opts.custom_repositories)
 	local existing_lines = {}
 	if vim.fn.filereadable(plugin_host_directory .. "pom.xml") == 1 then
 		existing_lines = vim.fn.readfile(plugin_host_directory .. "pom.xml")
@@ -139,15 +148,12 @@ end
 ---@field artifact_id string
 ---@field version string
 
----@class JavaPluginHostHostedPluginOpts
----@field name string|JavaPluginHostJarSpec|nil fill name <groupId>:<artifactId>:<version>
----@field repository string|nil custom repository to use, uses system default otherwise
-
 ---@class JavaPluginHostCommonHostOpts
 ---@field enabled boolean|nil set to false to disable common host and hosted plugins
 ---@field name string|JavaPluginHostJarSpec|nil can be set to change common host
 ---@field main_class_name string|nil if changing common host, also define main class name
 ---@field hosted_plugins List[JavaPluginHostJarSpec]|nil list of plugins to host
+---@field custom_repositories List[String]|nil list of custom repositories
 
 ---@class JavaPluginHostRPluginsOpts
 ---@field load_hosted boolean|nil if true, host plugins from rplugin/hosted-jar - true by default
@@ -160,6 +166,7 @@ end
 ---@field common_host JavaPluginHostCommonHostOpts|nil configuration related common plugin host
 ---@field classpath_extras List[string]|nil additional classpath entries
 ---@field log_level log_level|nil log level
+---@field autostart boolean|nil set to false if you wish to manually start java plugins
 
 local last_level = "info"
 
@@ -229,7 +236,6 @@ local function start_common_host()
 			handle_stderr(channel_id, data)
 		end,
 	})
-	vim.notify("Java plugin host started successfully!")
 end
 
 local function start_standalone_rplugins()
@@ -262,11 +268,12 @@ function M.setup(opts)
 	opts.rplugins = opts.rplugins or {}
 	opts.common_host = opts.common_host or {}
 	opts.common_host.hosted_plugins = opts.common_host.hosted_plugins or {}
+	opts.common_host.custom_repositories = opts.common_host.custom_repositories or {}
 	opts.common_host.name = opts.common_host.name
 		or {
 			group_id = "com.ensarsarajcic.neovim.java",
 			artifact_id = "plugins-common-host",
-			version = "0.4.1",
+			version = "0.4.2",
 		}
 	opts.common_host.main_class_name = opts.common_host.main_class_name or default_main_class_name
 
@@ -275,9 +282,15 @@ function M.setup(opts)
 	end
 
 	last_opts = opts
-	rebuild_classpath(start_common_host)
+	rebuild_classpath(function()
+		if opts.autostart ~= false then
+			start_common_host()
+		end
+	end)
 
-	start_standalone_rplugins()
+	if opts.autostart ~= false then
+		start_standalone_rplugins()
+	end
 
 	vim.api.nvim_create_user_command("NeovimJavaLogs", function(_)
 		M.open_logs()
