@@ -9,7 +9,7 @@ return {
 	check = function()
 		health.report_start("External dependencies")
 
-		local required_executables = { "mvn", "gradle", "lein", "sbt" }
+		local required_executables = { "mvn" }
 		for _, executable in ipairs(required_executables) do
 			if vim.fn.has("win32") == 1 then
 				executable = executable .. ".exe"
@@ -17,7 +17,7 @@ return {
 			if vim.fn.executable(executable) == 0 then
 				health.report_error(
 					executable
-						.. " is not executable! You won't be able to build some of the plugins that may rely on these tools!"
+						.. " is not executable! You won't be able to use common host or plugins from maven repositories!"
 				)
 			else
 				local handle = io.popen(executable .. " --version")
