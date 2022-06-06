@@ -131,6 +131,9 @@ local function fetch_plugins(common_host_opts, callback)
 					vim.log.levels.ERROR
 				)
 			else
+				for old_jar in vim.split(vim.fn.glob("~/.local/share/nvim/java-plugin-host/jars/*.jar"), "\n") do
+					os.remove(old_jar)
+				end
 				executor.run_command("mvn", {
 					args = {
 						"dependency:copy-dependencies",
