@@ -1,6 +1,6 @@
-# java_plugin_host
+# Java plugin host
 
-Java plugin host
+Plugin enabling configuration of Neovim using Java and running JAR plugins.
 
 **WORK IN PROGRESS - EXPERIMENTAL, USE AT YOUR OWN RISK!**
 
