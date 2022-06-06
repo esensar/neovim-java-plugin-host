@@ -278,6 +278,13 @@ function M.setup(opts)
 	rebuild_classpath(start_common_host)
 
 	start_standalone_rplugins()
+
+	vim.api.nvim_create_user_command("NeovimJavaLogs", function(_)
+		M.open_logs()
+	end, {
+		nargs = 0,
+		desc = "Open neovim java plugin logs in a new buffer",
+	})
 end
 
 function M.rebuild_classpath(classpath_callback)
@@ -309,6 +316,10 @@ function M.stop()
 		vim.fn.jobstop(v)
 	end
 	standalone_jobs = {}
+end
+
+function M.open_logs()
+	vim.cmd("edit " .. log.logfile)
 end
 
 return M
