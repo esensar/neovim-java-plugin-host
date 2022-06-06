@@ -216,9 +216,6 @@ local function rebuild_classpath(callback)
 					if code > 0 then
 						vim.notify("Compilation for java files failed!", vim.log.levels.ERROR)
 					end
-					if last_opts.rplugins.load_class then
-						vim.list_extend(M.classpath, vim.api.nvim_get_runtime_file("rplugin/java", true))
-					end
 					callback()
 				end)
 			else
