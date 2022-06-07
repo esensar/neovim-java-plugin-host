@@ -2,7 +2,7 @@
 
 INTRODUCTION                                     *java_plugin_host*
 
-Description
+Java in Neovim!
 
 CONTENTS                                         *java_plugin_host-contents*
 
@@ -11,10 +11,10 @@ CONTENTS                                         *java_plugin_host-contents*
   3.  Installation                               |java_plugin_host-installation|
   4.  Usage                                      |java_plugin_host-usage|
   5.  Functions                                  |java_plugin_host-functions|
-  6. Issues                                     |java_plugin_host-issues|
-  7. Contributing                               |java_plugin_host-contributing|
-  8. Version                                    |java_plugin_host-version|
-  9. License                                    |java_plugin_host-license|
+  6.  Issues                                     |java_plugin_host-issues|
+  7.  Contributing                               |java_plugin_host-contributing|
+  8.  Version                                    |java_plugin_host-version|
+  9.  License                                    |java_plugin_host-license|
 
 OVERVIEW                                         *java_plugin_host-overview*
 
@@ -86,18 +86,65 @@ Call setup function and define plugins in it. The following shows default option
     autostart = true, -- set to false to prevent automatic start of plugins - must call start() then
   }
 
+*NOTE**: When adding `.java` classes directly in `rplugin/java`, make sure
+to create directories for packages starting from `rplugin/java` as root.
+This means that any `.java` classes found in `rplugin/java` directly
+should have no package at all (implicit root package).
+
 FUNCTIONS                                        *java_plugin_host-functions*
 
-`require("java_plugin_host").setup()` - main function for configuring the plugin, must be called before using any other function
-`require("java_plugin_host").start()` - start common plugin host and all standalone plugins - needed only if `autostart = false` or explicitly stopped
-`require("java_plugin_host").stop()` - stop common plugin host and all standalone plugins
-`require("java_plugin_host").restart()` - restart common plugin host and all standalone plugins - works only if already running
-`require("java_plugin_host").open_logs()` - open plugin logs - shows logs from all hosted and standalone plugins - also mapped to `NeovimJavaLogs`
-`require("java_plugin_host").rebuild_classpath(callback)` - rebuild classpath used by the plugin and call callback with new classpath - can be useful to recompile all config and then restart the plugin
+`require("java_plugin_host").setup()`                  *java_plugin_host.setup*
+main function for configuring the plugin,
+must be called before using any other function
 
-Classpath can also be directly accessed with `require("java_plugin_host").classpath` (only after `setup()` call).
+`require("java_plugin_host").start()`                  *java_plugin_host.start*
+start common plugin host and all standalone plugins
+needed only if `autostart = false` or explicitly stopped
 
-If using [nvim-jdtls](https://github.com/mfussenegger/nvim-jdtls), it can be configured to add classpath of the common host. This enables writing configuration directly in nvim config `rplugin/java` directory, as any other configuration file. It is recommended to keep separate nvim-jdtls configuration for nvim config, to prevent showing plugin autocomplete suggestions in other Java code. Example configuration can be found in [my dotfiles](https://github.com/esensar/dotfiles/blob/main/symlinks/config/nvim/lua/esensar/lsp/jdtls_setup.lua).
+`require("java_plugin_host").stop()`                    *java_plugin_host.stop*
+stop common plugin host and all standalone plugins
+
+`require("java_plugin_host").restart()`              *java_plugin_host.restart*
+restart common plugin host and all standalone plugins
+works only if already running
+
+                                                            *:NeovimJavaLogs*
+`require("java_plugin_host").open_logs()`          *java_plugin_host.open_logs*
+open plugin logs
+shows logs from all hosted and standalone plugins
+also mapped to `NeovimJavaLogs`
+
+                                         *java_plugin_host.rebuild_classpath*
+`require("java_plugin_host").rebuild_classpath(callback)`
+rebuild classpath used by the plugin and call callback with new classpath
+can be useful to recompile all config and then restart the plugin
+
+`require("java_plugin_host").request(...)`           *java_plugin_host.request*
+shortcut for `rpcrequest` which uses common host job id >
+
+  require("java_plugin_host").request("my_custom_request_handler", "arg1")
+
+<
+
+`require("java_plugin_host").notify(...)`             *java_plugin_host.notify*
+shortcut for `rpcnotify` which uses common host job id >
+
+  require("java_plugin_host").notify("my_custom_notification_handler", "arg1")
+
+<
+
+
+Classpath can also be directly accessed with
+`require("java_plugin_host").classpath` (only after `setup()` call).
+
+If using [nvim-jdtls](https://github.com/mfussenegger/nvim-jdtls),
+it can be configured to add classpath of the common host.
+This enables writing configuration directly
+in nvim config `rplugin/java` directory, as any other configuration file.
+It is recommended to keep separate nvim-jdtls configuration for nvim config,
+to prevent showing plugin autocomplete suggestions in other Java code.
+Example configuration can be found in
+https://github.com/esensar/dotfiles/blob/main/symlinks/config/nvim/lua/esensar/lsp/jdtls_setup.lua.
 
   config.settings = {
     java = {
@@ -123,7 +170,7 @@ Otherwise, feel free to create a new issue or pull request.
 
 VERSION                                          *java_plugin_host-version*
 
-Version 0.1.2
+Version 0.1.3
 
 LICENSE                                          *java_plugin_host-license*
 

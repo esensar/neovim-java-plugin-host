@@ -81,6 +81,8 @@ require("java_plugin_host").setup {
 `require("java_plugin_host").restart()` - restart common plugin host and all standalone plugins - works only if already running
 `require("java_plugin_host").open_logs()` - open plugin logs - shows logs from all hosted and standalone plugins - also mapped to `NeovimJavaLogs`
 `require("java_plugin_host").rebuild_classpath(callback)` - rebuild classpath used by the plugin and call callback with new classpath - can be useful to recompile all config and then restart the plugin
+`require("java_plugin_host").request(...)` - shortcut for `rpcrequest` which uses common host job id - example: `require("java_plugin_host").request("my_custom_request_handler", "arg1")`
+`require("java_plugin_host").notify(...)` - shortcut for `rpcnotify` which uses common host job id - example: `require("java_plugin_host").notify("my_custom_notification_handler", "arg1")`
 
 Classpath can also be directly accessed with `require("java_plugin_host").classpath` (only after `setup()` call).
 

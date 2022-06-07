@@ -343,4 +343,18 @@ function M.open_logs()
 	vim.cmd("edit " .. log.logfile)
 end
 
+function M.request(...)
+	if common_host_job_id == nil then
+		error("Common host is not started", vim.log.levels.ERROR)
+	end
+	vim.fn.rpcrequest(common_host_job_id, ...)
+end
+
+function M.notify(...)
+	if common_host_job_id == nil then
+		error("Common host is not started", vim.log.levels.ERROR)
+	end
+	vim.fn.rpcnotify(common_host_job_id, ...)
+end
+
 return M
