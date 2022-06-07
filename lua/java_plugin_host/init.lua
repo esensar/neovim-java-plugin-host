@@ -245,7 +245,7 @@ local function start_common_host()
 		end,
 		on_exit = function(channel_id, code, event)
 			if code > 0 then
-				vim.notify("Common host exited with code: " .. code .. ". Message: " .. event)
+				vim.notify("Common host exited with code: " .. code .. ". Message: " .. event, vim.log.levels.WARN)
 			end
 			if channel_id == common_host_job_id then
 				common_host_job_id = nil
@@ -285,7 +285,8 @@ local function start_standalone_rplugins()
 								.. ") exited with code "
 								.. code
 								.. ". Message: "
-								.. event
+								.. event,
+							vim.log.levels.WARN
 						)
 					end
 				end,
