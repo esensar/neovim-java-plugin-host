@@ -7,7 +7,10 @@
 local config = require("java_plugin_host.config")
 local M = {}
 
-M.logfile = string.format("%s/%s.log", vim.api.nvim_call_function("stdpath", { "cache" }), "java_plugin_host")
+M.logdir = string.format("%s/%s/", vim.fn.stdpath("cache"), "java_plugin_host")
+function M.logfile(name)
+	return string.format("%s/%s.log", M.logdir, name or "common_host")
+end
 
 M.level = config.log_level
 
@@ -34,7 +37,7 @@ local make_string = function(...)
 	return table.concat(t, " ")
 end
 
-function M.log_at_level(level, level_config, message_maker, ...)
+function M.log_at_level(name, level, level_config, message_maker, ...)
 	-- Return early if we're below the config.level
 	if level < M.levels[M.level] then
 		return
@@ -43,7 +46,7 @@ function M.log_at_level(level, level_config, message_maker, ...)
 
 	local msg = message_maker(...)
 
-	local fp = assert(io.open(M.logfile, "a"))
+	local fp = assert(io.open(M.logfile(name), "a"))
 	local str = string.format("[%-6s%s]: %s\n", nameupper, os.date(), msg)
 	fp:write(str)
 	fp:close()
@@ -52,12 +55,12 @@ end
 for i, x in ipairs(M.modes) do
 	-- log.info("these", "are", "separated")
 	M[x.name] = function(...)
-		return M.log_at_level(i, x, make_string, ...)
+		return M.log_at_level(nil, i, x, make_string, ...)
 	end
 
 	-- log.fmt_info("These are %s strings", "formatted")
 	M[("fmt_%s"):format(x.name)] = function(...)
-		return M.log_at_level(i, x, function(...)
+		return M.log_at_level(nil, i, x, function(...)
 			local passed = { ... }
 			local fmt = table.remove(passed, 1)
 			local inspected = {}
@@ -67,6 +70,30 @@ for i, x in ipairs(M.modes) do
 			return string.format(fmt, unpack(inspected))
 		end, ...)
 	end
+end
+
+function M.named(name)
+	local logger = {}
+	for i, x in ipairs(M.modes) do
+		-- log.info("these", "are", "separated")
+		logger[x.name] = function(...)
+			return M.log_at_level(name, i, x, make_string, ...)
+		end
+
+		-- log.fmt_info("These are %s strings", "formatted")
+		logger[("fmt_%s"):format(x.name)] = function(...)
+			return M.log_at_level(name, i, x, function(...)
+				local passed = { ... }
+				local fmt = table.remove(passed, 1)
+				local inspected = {}
+				for _, v in ipairs(passed) do
+					table.insert(inspected, vim.inspect(v))
+				end
+				return string.format(fmt, unpack(inspected))
+			end, ...)
+		end
+	end
+	return logger
 end
 
 return M

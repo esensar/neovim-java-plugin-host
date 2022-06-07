@@ -304,6 +304,7 @@ function M.setup(opts)
 		return
 	end
 	vim.fn.mkdir(plugin_host_directory, "p")
+	vim.fn.mkdir(log.logdir, "p")
 	opts = opts or {}
 	opts.rplugins = opts.rplugins or {}
 	opts.common_host = opts.common_host or {}
