@@ -109,10 +109,10 @@ restart common plugin host and all standalone plugins
 works only if already running
 
                                                             *:NeovimJavaLogs*
-`require("java_plugin_host").open_logs()`          *java_plugin_host.open_logs*
-open plugin logs
-shows logs from all hosted and standalone plugins
-also mapped to `NeovimJavaLogs`
+`require("java_plugin_host").open_logs(key)`       *java_plugin_host.open_logs*
+open plugin logs - common logs if key is nil,
+otherwise specific standalone plugin logs
+also mapped to `NeovimJavaLogs` - supports autocomplete
 
                                          *java_plugin_host.rebuild_classpath*
 `require("java_plugin_host").rebuild_classpath(callback)`
@@ -132,6 +132,10 @@ shortcut for `rpcnotify` which uses common host job id >
   require("java_plugin_host").notify("my_custom_notification_handler", "arg1")
 
 <
+
+                                        *java_plugin_host.get_standalone_jobs*
+`require("java_plugin_host").get_standalone_jobs()`
+returns table with all running standalone jobs
 
 
 Classpath can also be directly accessed with

@@ -175,17 +175,17 @@ end
 ---@field log_level log_level|nil log level
 ---@field autostart boolean|nil set to false if you wish to manually start java plugins
 
-local last_level = "info"
+local last_level = {}
 
-local function handle_stderr(channel_id, data)
+local function handle_stderr(name, channel_id, data)
 	local parts = vim.split(data[1], " ")
 	if #parts >= 2 then
 		local new_level = string.lower(parts[2])
 		if log[new_level] then
-			last_level = new_level
+			last_level[name] = new_level
 		end
 	end
-	log[last_level](data[1], " -- RPC Channel: " .. channel_id)
+	log.named(name)[last_level[name] or "info"](data[1], " -- RPC Channel: " .. channel_id)
 end
 
 M.log_level = "info"
@@ -241,7 +241,15 @@ local function start_common_host()
 	}, {
 		rpc = true,
 		on_stderr = function(channel_id, data, _)
-			handle_stderr(channel_id, data)
+			handle_stderr(nil, channel_id, data)
+		end,
+		on_exit = function(channel_id, code, event)
+			if code > 0 then
+				vim.notify("Common host exited with code: " .. code .. ". Message: " .. event)
+			end
+			if channel_id == common_host_job_id then
+				common_host_job_id = nil
+			end
 		end,
 	})
 end
@@ -250,6 +258,7 @@ local function start_standalone_rplugins()
 	if last_opts.rplugins.load_standalone then
 		local rplugin_jars = vim.api.nvim_get_runtime_file("rplugin/jar/*.jar", true)
 		for _, jar in ipairs(rplugin_jars) do
+			local key = string.gsub(jar, "%W", "")
 			local job_id = vim.fn.jobstart({
 				"java",
 				"-jar",
@@ -257,10 +266,31 @@ local function start_standalone_rplugins()
 			}, {
 				rpc = true,
 				on_stderr = function(channel_id, data, _)
-					handle_stderr(channel_id, data)
+					handle_stderr(key, channel_id, data)
+				end,
+				on_exit = function(channel_id, code, event)
+					local plugin
+					for i, v in ipairs(standalone_jobs) do
+						if v.job_id == channel_id then
+							plugin = v
+							table.remove(standalone_jobs, i)
+							break
+						end
+					end
+					plugin = plugin or {}
+					if code > 0 then
+						vim.notify(
+							"Standalone plugin ("
+								.. plugin.path
+								.. ") exited with code "
+								.. code
+								.. ". Message: "
+								.. event
+						)
+					end
 				end,
 			})
-			table.insert(standalone_jobs, job_id)
+			table.insert(standalone_jobs, { job_id = job_id, key = key, path = jar })
 		end
 	end
 end
@@ -300,11 +330,20 @@ function M.setup(opts)
 		start_standalone_rplugins()
 	end
 
-	vim.api.nvim_create_user_command("NeovimJavaLogs", function(_)
-		M.open_logs()
+	vim.api.nvim_create_user_command("NeovimJavaLogs", function(c)
+		local name = c.args
+		if string.len(name) == 0 then
+			name = nil
+		end
+		M.open_logs(name)
 	end, {
-		nargs = 0,
+		nargs = "?",
 		desc = "Open neovim java plugin logs in a new buffer",
+		complete = function(_)
+			return vim.tbl_map(function(x)
+				return x.key
+			end, standalone_jobs)
+		end,
 	})
 end
 
@@ -334,13 +373,13 @@ function M.stop()
 		common_host_job_id = nil
 	end
 	for _, v in ipairs(standalone_jobs) do
-		vim.fn.jobstop(v)
+		vim.fn.jobstop(v.job_id)
 	end
 	standalone_jobs = {}
 end
 
-function M.open_logs()
-	vim.cmd("edit " .. log.logfile)
+function M.open_logs(name)
+	vim.cmd("edit " .. log.logfile(name))
 end
 
 function M.request(...)
@@ -355,6 +394,10 @@ function M.notify(...)
 		error("Common host is not started", vim.log.levels.ERROR)
 	end
 	vim.fn.rpcnotify(common_host_job_id, ...)
+end
+
+function M.get_standalone_jobs()
+	return vim.deepcopy(standalone_jobs)
 end
 
 return M
