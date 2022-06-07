@@ -178,6 +178,7 @@ end
 local last_level = {}
 
 local function handle_stderr(name, channel_id, data)
+	name = name or "common_host"
 	local parts = vim.split(data[1], " ")
 	if #parts >= 2 then
 		local new_level = string.lower(parts[2])
