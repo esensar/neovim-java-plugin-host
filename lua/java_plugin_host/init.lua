@@ -316,7 +316,7 @@ function M.setup(opts)
 		or {
 			group_id = "com.ensarsarajcic.neovim.java",
 			artifact_id = "plugins-common-host",
-			version = "0.4.4",
+			version = "0.4.5",
 		}
 	opts.common_host.main_class_name = opts.common_host.main_class_name or default_main_class_name
 
