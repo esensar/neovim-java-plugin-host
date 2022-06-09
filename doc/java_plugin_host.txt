@@ -52,11 +52,11 @@ Call setup function and define plugins in it. The following shows default option
       -- This is an executable jar which will be started and host all other plugins
       -- Should be based on com.ensarsarajcic.neovim.java:plugin-host to work properly
       -- Or it should be able to properly process annotations used for plugins
-      -- This field can also be defined as string, e.g. "com.ensarsarajcic.neovim.java:plugins-common-host:0.4.2"
+      -- This field can also be defined as string, e.g. "com.ensarsarajcic.neovim.java:plugins-common-host:0.4.6"
       name = {
         group_id = "com.ensarsarajcic.neovim.java",
         artifact_id = "plugins-common-host",
-        version = "0.4.2"
+        version = "0.4.6"
       },
       -- When changing common_host.name, this should also be changed to the main class
       -- of the other artifact used as common host
@@ -67,10 +67,10 @@ Call setup function and define plugins in it. The following shows default option
       -- {
       --   "group_id": "com.ensarsarajcic.neovim.java",
       --   "artifact": "rplugin-hosted-example",
-      --   "version": "0.4.2"
+      --   "version": "0.4.6"
       -- },
       -- or:
-      -- "com.ensarsarajcic.neovim.java:rplugin-hosted-example:0.4.2"
+      -- "com.ensarsarajcic.neovim.java:rplugin-hosted-example:0.4.6"
       },
       -- Custom repositories
       custom_repositories = {
