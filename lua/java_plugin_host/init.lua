@@ -179,7 +179,7 @@ end
 
 local last_level = {}
 
-local function handle_stderr(name, channel_id, data)
+local function handle_stderr(name, data)
 	name = name or "common_host"
 	local parts = vim.split(data[1], " ")
 	if #parts >= 2 then
@@ -188,7 +188,7 @@ local function handle_stderr(name, channel_id, data)
 			last_level[name] = new_level
 		end
 	end
-	log.named(name)[last_level[name] or "info"](data[1], " -- RPC Channel: " .. channel_id)
+	log.named(name)[last_level[name] or "info"](data[1])
 end
 
 M.log_level = "info"
@@ -243,8 +243,8 @@ local function start_common_host()
 		last_opts.common_host.main_class_name,
 	}, {
 		rpc = true,
-		on_stderr = function(channel_id, data, _)
-			handle_stderr(nil, channel_id, data)
+		on_stderr = function(_, data, _)
+			handle_stderr(nil, data)
 		end,
 		on_exit = function(channel_id, code, event)
 			if code > 0 then
@@ -268,8 +268,8 @@ local function start_standalone_rplugins()
 				jar,
 			}, {
 				rpc = true,
-				on_stderr = function(channel_id, data, _)
-					handle_stderr(key, channel_id, data)
+				on_stderr = function(_, data, _)
+					handle_stderr(key, data)
 				end,
 				on_exit = function(channel_id, code, event)
 					local plugin
@@ -316,7 +316,7 @@ function M.setup(opts)
 		or {
 			group_id = "com.ensarsarajcic.neovim.java",
 			artifact_id = "plugins-common-host",
-			version = "0.4.5",
+			version = "0.4.6",
 		}
 	opts.common_host.main_class_name = opts.common_host.main_class_name or default_main_class_name
 
