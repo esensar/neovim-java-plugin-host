@@ -9,7 +9,7 @@ local config = require("java_plugin_host.config")
 local M = {}
 
 local plugin_host_directory = string.format("%s/java-plugin-host/", vim.fn.stdpath("data"))
-local jars_directory = string.format("%s/jars/", plugin_host_directory)
+local jars_directory = string.format("%sjars/", plugin_host_directory)
 local default_main_class_name = "com.ensarsarajcic.neovim.java.commonhost.CommonPluginHost"
 
 local function spec_to_xml(spec)
@@ -247,7 +247,7 @@ local common_host_job_id = nil
 local standalone_jobs = {}
 
 local function rebuild_classpath(callback)
-	M.classpath = last_opts.classpath_extras or {}
+	M.classpath = vim.deepcopy(last_opts.classpath_extras) or {}
 	if last_opts.rplugins.load_class then
 		vim.list_extend(M.classpath, vim.api.nvim_get_runtime_file("rplugin/java", true))
 	end
@@ -284,6 +284,8 @@ local function rebuild_classpath(callback)
 				callback()
 			end
 		end)
+	else
+		callback()
 	end
 end
 
