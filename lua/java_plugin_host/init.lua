@@ -388,11 +388,13 @@ function M.setup(opts)
 		nargs = "?",
 		desc = "Open neovim java plugin logs in a new buffer",
 		complete = function(_)
-			local items = vim.tbl_map(function(x)
-				return x.key
-			end, standalone_jobs)
-			table.insert(items, 0, "common_host")
-			table.insert(items, 0, "lua_plugin")
+			local items = { "common_host", "lua_plugin" }
+			vim.list_extend(
+				items,
+				vim.tbl_map(function(x)
+					return x.key
+				end, standalone_jobs)
+			)
 			return items
 		end,
 	})
