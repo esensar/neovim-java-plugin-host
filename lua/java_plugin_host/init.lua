@@ -23,11 +23,7 @@ local function spec_to_xml(spec)
 end
 
 local function repo_to_xml(spec)
-	return "            <repository><id>"
-		.. string.gsub(spec, "%W", "")
-		.. "</id><url>"
-		.. spec
-		.. "</url></repository>"
+	return "            <repository><id>" .. spec.id .. "</id><url>" .. spec.url .. "</url></repository>"
 end
 
 local function build_temp_pom_xml(specs, repo_specs)
@@ -157,12 +153,19 @@ end
 ---@field artifact_id string
 ---@field version string
 
+---@class JavaPluginHostedPluginSpec
+---@field name JavaPluginHostJarSpec|string
+
+---@class JavaPluginHostRepositorySpec
+---@field url string
+---@field id string
+
 ---@class JavaPluginHostCommonHostOpts
 ---@field enabled boolean|nil set to false to disable common host and hosted plugins
 ---@field name string|JavaPluginHostJarSpec|nil can be set to change common host
 ---@field main_class_name string|nil if changing common host, also define main class name
 ---@field hosted_plugins List[JavaPluginHostJarSpec]|nil list of plugins to host
----@field custom_repositories List[String]|nil list of custom repositories
+---@field custom_repositories List[JavaPluginHostRepositorySpec]|nil list of custom repositories
 
 ---@class JavaPluginHostRPluginsOpts
 ---@field load_hosted boolean|nil if true, host plugins from rplugin/hosted-jar - true by default

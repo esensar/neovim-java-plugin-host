@@ -65,9 +65,9 @@ Call setup function and define plugins in it. The following shows default option
       hosted_plugins = {
       -- Example:
       -- {
-      --   "group_id": "com.ensarsarajcic.neovim.java",
-      --   "artifact": "rplugin-hosted-example",
-      --   "version": "0.4.6"
+      --   group_id = "com.ensarsarajcic.neovim.java",
+      --   artifact_id = "rplugin-hosted-example",
+      --   version = "0.4.6"
       -- },
       -- or:
       -- "com.ensarsarajcic.neovim.java:rplugin-hosted-example:0.4.6"
@@ -75,7 +75,10 @@ Call setup function and define plugins in it. The following shows default option
       -- Custom repositories
       custom_repositories = {
       -- Example:
-      -- "https://maven.pkg.github.com/OWNER/REPOSITORY"
+      -- {
+      --   id = "github",
+      --   url = "https://maven.pkg.github.com/OWNER/REPOSITORY",
+      -- }
       }
     },
     -- Extend with a list of strings - additional classpath entries

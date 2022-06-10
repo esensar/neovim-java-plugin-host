@@ -49,9 +49,9 @@ require("java_plugin_host").setup {
     hosted_plugins = {
     -- Example:
     -- {
-    --   "group_id": "com.ensarsarajcic.neovim.java",
-    --   "artifact": "rplugin-hosted-example",
-    --   "version": "0.4.2"
+    --   group_id = "com.ensarsarajcic.neovim.java",
+    --   artifact_id = "rplugin-hosted-example",
+    --   version = "0.4.2"
     -- },
     -- or:
     -- "com.ensarsarajcic.neovim.java:rplugin-hosted-example:0.4.2"
@@ -59,7 +59,10 @@ require("java_plugin_host").setup {
     -- Custom repositories
     custom_repositories = {
     -- Example:
-    -- "https://maven.pkg.github.com/OWNER/REPOSITORY"
+    -- {
+    --   id = "github",
+    --   url = "https://maven.pkg.github.com/OWNER/REPOSITORY"
+    -- }
     }
   },
   -- Extend with a list of strings - additional classpath entries
