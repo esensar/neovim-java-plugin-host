@@ -114,30 +114,68 @@ local function fetch_plugins(common_host_opts, callback)
 	if changes then
 		vim.fn.writefile(lines, plugin_host_directory .. "pom.xml")
 	end
+	log.named("lua_plugin").info("Running `mvn clean package` in " .. plugin_host_directory)
 	executor.run_command("mvn", {
 		args = { "clean", "package" },
 		uv = {
 			cwd = plugin_host_directory,
+			stderr = function(_, data)
+				if data then
+					log.named("lua_plugin").error("[mvn clean package (OUTPUT)]", data)
+				end
+			end,
+			stdout = function(_, data)
+				if data then
+					log.named("lua_plugin").info("[mvn clean package (OUTPUT)]", data)
+				end
+			end,
 		},
 	}, function(code, _)
 		if code > 0 then
 			vim.notify(
 				"Installing java_plugin_host dependencies failed! Please check "
 					.. plugin_host_directory
-					.. " and try running `mvn package`",
+					.. " and try running `mvn package`. Check out logs with :NeovimJavaLogs lua_plugin",
 				vim.log.levels.ERROR
 			)
 		else
-			for _, old_jar in ipairs(vim.split(vim.fn.glob("~/.local/share/nvim/java-plugin-host/jars/*.jar"), "\n")) do
+			log.named("lua_plugin").info("Removing old JARs from " .. plugin_host_directory .. "jars")
+			for _, old_jar in ipairs(vim.split(vim.fn.glob(plugin_host_directory .. "jars/*.jar"), "\n")) do
+				log.named("lua_plugin").info("Removing " .. old_jar)
 				os.remove(old_jar)
 			end
+			log.named("lua_plugin").info(
+				"Running `mvn dependency:copy-dependencies -DprependGroupId=true -DoutputDirectory="
+					.. jars_directory
+					.. "` in "
+					.. plugin_host_directory
+			)
 			executor.run_command("mvn", {
 				args = {
 					"dependency:copy-dependencies",
 					"-DprependGroupId=true",
 					"-DoutputDirectory=" .. jars_directory,
 				},
-			}, function(_, _)
+				uv = {
+					cwd = plugin_host_directory,
+					stderr = function(_, data)
+						if data then
+							log.named("lua_plugin").error("[mvn dependency:copy-dependencies (OUTPUT)]", data)
+						end
+					end,
+					stdout = function(_, data)
+						if data then
+							log.named("lua_plugin").info("[mvn dependency:copy-dependencies (OUTPUT)]", data)
+						end
+					end,
+				},
+			}, function(copy_code, _)
+				if copy_code > 0 then
+					vim.notify(
+						"Copying JARS failed! Check out logs with :NeovimJavaLogs lua_plugin",
+						vim.log.levels.ERROR
+					)
+				end
 				callback()
 			end)
 		end
@@ -216,9 +254,13 @@ local function rebuild_classpath(callback)
 						vim.fn.join(M.classpath, ":"),
 					}
 					vim.list_extend(args, source_files)
+					log.named("lua_plugin").info("Running `javac " .. table.concat(args, " ") .. "`")
 					executor.run_command("javac", {
 						args = args,
 					}, function(code, _)
+						log.named("lua_plugin").info(
+							"`javac " .. table.concat(args, " ") .. "` completed with code " .. code
+						)
 						if code > 0 then
 							vim.notify("Compilation for java files failed!", vim.log.levels.ERROR)
 						end
@@ -338,7 +380,7 @@ function M.setup(opts)
 
 	vim.api.nvim_create_user_command("NeovimJavaLogs", function(c)
 		local name = c.args
-		if string.len(name) == 0 then
+		if string.len(name) == 0 or name == "common_host" then
 			name = nil
 		end
 		M.open_logs(name)
@@ -346,9 +388,12 @@ function M.setup(opts)
 		nargs = "?",
 		desc = "Open neovim java plugin logs in a new buffer",
 		complete = function(_)
-			return vim.tbl_map(function(x)
+			local items = vim.tbl_map(function(x)
 				return x.key
 			end, standalone_jobs)
+			table.insert(items, 0, "common_host")
+			table.insert(items, 0, "lua_plugin")
+			return items
 		end,
 	})
 end
