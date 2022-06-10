@@ -106,6 +106,11 @@ config.settings = {
 }
 ```
 
+## Writing plugins for the host
+
+Check out examples and templates:
+- **Example:** [neovim-http-api-plugin](https://github.com/esensar/neovim-http-api-plugin) - *supports different ways of installation, highlighting differences*
+
 ## Contributing
 
 Check out [contributing guidelines](CONTRIBUTING.md).
