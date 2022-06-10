@@ -12,8 +12,6 @@ function M.logfile(name)
 	return string.format("%s/%s.log", M.logdir, name or "common_host")
 end
 
-M.level = config.log_level
-
 -- Level configuration
 M.modes = {
 	{ name = "trace", hl = "Comment" },
@@ -39,7 +37,7 @@ end
 
 function M.log_at_level(name, level, level_config, message_maker, ...)
 	-- Return early if we're below the config.level
-	if level < M.levels[M.level] then
+	if level < M.levels[config.log_level] then
 		return
 	end
 	local nameupper = level_config.name:upper()
