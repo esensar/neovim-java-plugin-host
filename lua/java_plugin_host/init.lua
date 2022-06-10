@@ -113,39 +113,35 @@ local function fetch_plugins(common_host_opts, callback)
 
 	if changes then
 		vim.fn.writefile(lines, plugin_host_directory .. "pom.xml")
-		executor.run_command("mvn", {
-			args = { "clean", "package" },
-			uv = {
-				cwd = plugin_host_directory,
-			},
-		}, function(code, _)
-			if code > 0 then
-				vim.notify(
-					"Installing java_plugin_host dependencies failed! Please check "
-						.. plugin_host_directory
-						.. " and try running `mvn package`",
-					vim.log.levels.ERROR
-				)
-			else
-				for _, old_jar in
-					ipairs(vim.split(vim.fn.glob("~/.local/share/nvim/java-plugin-host/jars/*.jar"), "\n"))
-				do
-					os.remove(old_jar)
-				end
-				executor.run_command("mvn", {
-					args = {
-						"dependency:copy-dependencies",
-						"-DprependGroupId=true",
-						"-DoutputDirectory=" .. jars_directory,
-					},
-				}, function(_, _)
-					callback()
-				end)
-			end
-		end)
-	else
-		callback()
 	end
+	executor.run_command("mvn", {
+		args = { "clean", "package" },
+		uv = {
+			cwd = plugin_host_directory,
+		},
+	}, function(code, _)
+		if code > 0 then
+			vim.notify(
+				"Installing java_plugin_host dependencies failed! Please check "
+					.. plugin_host_directory
+					.. " and try running `mvn package`",
+				vim.log.levels.ERROR
+			)
+		else
+			for _, old_jar in ipairs(vim.split(vim.fn.glob("~/.local/share/nvim/java-plugin-host/jars/*.jar"), "\n")) do
+				os.remove(old_jar)
+			end
+			executor.run_command("mvn", {
+				args = {
+					"dependency:copy-dependencies",
+					"-DprependGroupId=true",
+					"-DoutputDirectory=" .. jars_directory,
+				},
+			}, function(_, _)
+				callback()
+			end)
+		end
+	end)
 end
 
 ---@class JavaPluginHostJarSpec
