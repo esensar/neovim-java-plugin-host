@@ -474,11 +474,11 @@ function M.get_standalone_jobs()
 end
 
 function M.open_shell(command_callback)
-	M.rebuild_classpath(function()
+	M.rebuild_classpath(function(classpath)
 		command_callback(table.concat({
 			"jshell",
 			"-cp",
-			M.classpath,
+			vim.fn.join(classpath, ":"),
 		}, " "))
 	end)
 end
