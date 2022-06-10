@@ -409,6 +409,15 @@ function M.setup(opts)
 			return items
 		end,
 	})
+
+	vim.api.nvim_create_user_command("NeovimJavaShell", function(_)
+		M.open_shell(function(command)
+			vim.cmd("terminal " .. command)
+		end)
+	end, {
+		nargs = 0,
+		desc = "Open jshell with common host classpath",
+	})
 end
 
 function M.rebuild_classpath(classpath_callback)
@@ -462,6 +471,16 @@ end
 
 function M.get_standalone_jobs()
 	return vim.deepcopy(standalone_jobs)
+end
+
+function M.open_shell(command_callback)
+	M.rebuild_classpath(function()
+		command_callback(table.concat({
+			"jshell",
+			"-cp",
+			M.classpath,
+		}, " "))
+	end)
 end
 
 return M
