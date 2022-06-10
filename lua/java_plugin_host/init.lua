@@ -117,20 +117,23 @@ local function fetch_plugins(common_host_opts, callback)
 	log.named("lua_plugin").info("Running `mvn clean package` in " .. plugin_host_directory)
 	executor.run_command("mvn", {
 		args = { "clean", "package" },
+		stderr = function(_, data)
+			if data then
+				log.named("lua_plugin").error("[mvn clean package (OUTPUT)]", data)
+			end
+		end,
+		stdout = function(_, data)
+			if data then
+				log.named("lua_plugin").debug("[mvn clean package (OUTPUT)]", data)
+			end
+		end,
 		uv = {
 			cwd = plugin_host_directory,
-			stderr = function(_, data)
-				if data then
-					log.named("lua_plugin").error("[mvn clean package (OUTPUT)]", data)
-				end
-			end,
-			stdout = function(_, data)
-				if data then
-					log.named("lua_plugin").info("[mvn clean package (OUTPUT)]", data)
-				end
-			end,
 		},
 	}, function(code, _)
+		log.named("lua_plugin").info(
+			"`mvn clean package` in " .. plugin_host_directory .. " completed with code " .. code
+		)
 		if code > 0 then
 			vim.notify(
 				"Installing java_plugin_host dependencies failed! Please check "
@@ -156,20 +159,28 @@ local function fetch_plugins(common_host_opts, callback)
 					"-DprependGroupId=true",
 					"-DoutputDirectory=" .. jars_directory,
 				},
+				stderr = function(_, data)
+					if data then
+						log.named("lua_plugin").error("[mvn dependency:copy-dependencies (OUTPUT)]", data)
+					end
+				end,
+				stdout = function(_, data)
+					if data then
+						log.named("lua_plugin").info("[mvn dependency:copy-dependencies (OUTPUT)]", data)
+					end
+				end,
 				uv = {
 					cwd = plugin_host_directory,
-					stderr = function(_, data)
-						if data then
-							log.named("lua_plugin").error("[mvn dependency:copy-dependencies (OUTPUT)]", data)
-						end
-					end,
-					stdout = function(_, data)
-						if data then
-							log.named("lua_plugin").info("[mvn dependency:copy-dependencies (OUTPUT)]", data)
-						end
-					end,
 				},
 			}, function(copy_code, _)
+				log.named("lua_plugin").info(
+					"`mvn dependency:copy-dependencies -DprependGroupId=true -DoutputDirectory="
+						.. jars_directory
+						.. "` in "
+						.. plugin_host_directory
+						.. " completed with code "
+						.. copy_code
+				)
 				if copy_code > 0 then
 					vim.notify(
 						"Copying JARS failed! Check out logs with :NeovimJavaLogs lua_plugin",
