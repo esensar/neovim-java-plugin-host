@@ -477,7 +477,7 @@ function M.open_shell(command_callback)
 	M.rebuild_classpath(function(classpath)
 		command_callback(table.concat({
 			"jshell",
-			"-cp",
+			"--class-path",
 			vim.fn.join(classpath, ":"),
 		}, " "))
 	end)
