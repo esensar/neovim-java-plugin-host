@@ -238,6 +238,7 @@ end
 local function start_common_host()
 	common_host_job_id = vim.fn.jobstart({
 		"java",
+		"-Dorg.slf4j.simpleLogger.defaultLogLevel=" .. config.log_level,
 		"-classpath",
 		vim.fn.join(M.classpath, ":"),
 		last_opts.common_host.main_class_name,
@@ -264,6 +265,7 @@ local function start_standalone_rplugins()
 			local key = string.gsub(jar, "%W", "")
 			local job_id = vim.fn.jobstart({
 				"java",
+				"-Dorg.slf4j.simpleLogger.defaultLogLevel=" .. config.log_level,
 				"-jar",
 				jar,
 			}, {
