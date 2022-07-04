@@ -14,10 +14,6 @@ Following is a basic set of guidelines for contributing to this repository and i
   - [Lint](#lint)
 - [Additional info](#additional-info)
 
-## Asking questions
-
-For asking questions, please make sure to use [**Discussions**](https://github.com/esensar/neovim-java-plugin-host/discussions) instead of **Issues**.
-
 ## Styleguides
 
 ### Commit messages

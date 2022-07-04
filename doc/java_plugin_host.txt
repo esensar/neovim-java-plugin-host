@@ -32,7 +32,7 @@ Packer.nvim <https://github.com/wbthomason/packer.nvim>
 
 Add the following to your packer setup: >
 
-  use { 'esensar/neovim-java-plugin-host' }
+  use { 'https://codeberg.org/neovim-java/neovim-java-plugin-host' }
 <
 
 USAGE                                            *java_plugin_host-usage*

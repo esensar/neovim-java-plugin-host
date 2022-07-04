@@ -1,0 +1,10 @@
+pipeline:
+  test:
+    image: alpine
+    commands:
+      - apk add neovim
+      - git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
+      - ln -s "$(pwd)" ~/.local/share/nvim/site/pack/vendor/start
+      - scripts/test
+
+branches: main

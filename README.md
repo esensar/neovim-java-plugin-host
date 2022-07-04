@@ -16,7 +16,7 @@ Install using favourite plugin manager.
 e.g. Using [Packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```
-use { 'esensar/neovim-java-plugin-host' }
+use { 'https://codeberg.org/neovim-java/neovim-java-plugin-host' }
 ```
 
 ## Usage
@@ -109,7 +109,7 @@ config.settings = {
 ## Writing plugins for the host
 
 Check out examples and templates:
-- **Example:** [neovim-http-api-plugin](https://github.com/esensar/neovim-http-api-plugin) - *supports different ways of installation, highlighting differences*
+- **Example:** [neovim-http-api-plugin](https://codeberg.org/neovim-java/neovim-http-api-plugin) - *supports different ways of installation, highlighting differences*
 
 ## Contributing
 
